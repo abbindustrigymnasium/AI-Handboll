@@ -16,14 +16,17 @@ def calcFPS(img, pTime):
                 cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 0), 3)
     return img
 
+def captureVideo():
+    while True:
+        success, img = cap.read()
+        img = detector.findPose(img)
+        lmList = detector.findPosition(img)
+        # print(lmList[14])    //Specific Datapoint
+        print(lmList)  # All points
 
-while True:
-    success, img = cap.read()
-    img = detector.findPose(img)
-    lmList = detector.findPosition(img)
-    # print(lmList[14])    //Specific Datapoint
-    print(lmList)  # All points
+        img = calcFPS(img, pTime)
+        cv2.imshow("image", img)
+        cv2.waitKey(1)
 
-    img = calcFPS(img, pTime)
-    cv2.imshow("image", img)
     cv2.waitKey(1)
+captureVideo()
