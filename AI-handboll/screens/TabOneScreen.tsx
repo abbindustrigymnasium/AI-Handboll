@@ -4,6 +4,20 @@ import ImageBackgroundComponent from '../components/ImageBackground';
 
 const image = { uri: 'AI-handboll/assets/images/sverige.jpg' };
 
+const uploadVideoButton = () => {
+  return fetch('http://54.145.22.116/put/?filename=')
+      .then((response) => response.json())
+      .then((json) => {
+        return json;
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+};
+
+
+
+
 export default function TabOneScreen () {
   return (
       <View style={styles.container}>
@@ -15,7 +29,7 @@ export default function TabOneScreen () {
             },
             styles.button,
           ]}
-          onPress={() => Alert.alert('Button Pressed!')}>
+          onPress={() => uploadVideoButton()}>
           <Text style={styles.buttonText}>ladda upp video</Text>
         </Pressable>
       </View>
