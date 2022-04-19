@@ -1,8 +1,8 @@
 from time import process_time_ns
 import cv2
-vidcap = cv2.VideoCapture('./Video till AI/Sämre exempel 9m/Sämre 9m/nov52021-1009fm-GjgN0a.MOV')
+vidcap = cv2.VideoCapture('./Video till AI/Sämre exempel 9m/sen i redo/vid6.mp4')
 success,image = vidcap.read()
-count = 293
+count = 606
 i = 0
 
 while success:
