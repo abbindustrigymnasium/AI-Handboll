@@ -1,27 +1,21 @@
 import React from 'react';
 import { ImageBackground, StyleSheet, Pressable, Alert, Text, View, } from 'react-native';
-import ImageBackgroundComponent from '../components/ImageBackground';
 
 const image = { uri: 'AI-handboll/assets/images/sverige.jpg' };
 
-const uploadVideoButton = () => {
-  return fetch('http://54.145.22.116/put/?filename=')
-      .then((response) => response.json())
-      .then((json) => {
-        return json;
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+const uploadVideoButton = async () => {
+  try {
+    const response = await fetch('http://54.145.22.116/put/?filename=');
+    const json = await response.json();
+    return json;
+  } catch (error) {
+    console.error(error);
+  }
 };
-
-
-
 
 export default function TabOneScreen () {
   return (
       <View style={styles.container}>
-        <ImageBackgroundComponent></ImageBackgroundComponent>
         <Pressable
           style={({ pressed }) => [
             {
