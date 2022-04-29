@@ -1,9 +1,25 @@
 import React from 'react';
-import { StyleSheet, Pressable, Alert, Text, View, } from 'react-native';
+import { ImageBackground, StyleSheet, Pressable, Alert, Text, View, } from 'react-native';
+
+const image = { uri: 'AI-handboll/assets/images/sverige.jpg' };
+
+const uploadVideoButton = async () => {
+  try {
+    const response = await fetch('https://54.145.22.116/docs#/default/create_upload_file_uploadfile_post');
+    const json = await response.json();
+    //spara video?
+    console.log(json);
+    return json;
+  } catch (error) {
+    console.error(error);
+  }
+};
 
 export default function TabOneScreen () {
   return (
-    <View style={styles.container}>
+      <View style={styles.container}>
+        {/* <ImageBackground source={image} resizeMode="cover" style={styles.image}>
+        </ImageBackground> */}
       <Pressable
         style={({ pressed }) => [
           {
@@ -11,10 +27,10 @@ export default function TabOneScreen () {
           },
           styles.button,
         ]}
-        onPress={() => Alert.alert('Button Pressed!')}>
+        onPress={() => uploadVideoButton()}>
         <Text style={styles.buttonText}>ladda upp video</Text>
       </Pressable>
-    </View>
+      </View>
   );
 };
 
@@ -38,4 +54,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'white',
   },
+  image: {
+    flex: 1,
+    justifyContent: 'center',
+    width: '100%',
+    height: '100%',
+  }
 });
