@@ -5,8 +5,9 @@ const image = { uri: 'AI-handboll/assets/images/sverige.jpg' };
 
 const uploadVideoButton = async () => {
   try {
-    const response = await fetch('https://pokeapi.co/api/v2/pokemon/ditto');
+    const response = await fetch('https://54.145.22.116/docs#/default/create_upload_file_uploadfile_post');
     const json = await response.json();
+    //spara video?
     console.log(json);
     return json;
   } catch (error) {
@@ -17,16 +18,18 @@ const uploadVideoButton = async () => {
 export default function TabOneScreen () {
   return (
       <View style={styles.container}>
-        <Pressable
-          style={({ pressed }) => [
-            {
-              backgroundColor: pressed ? 'yellow' : 'blue',
-            },
-            styles.button,
-          ]}
-          onPress={() => uploadVideoButton()}>
-          <Text style={styles.buttonText}>ladda upp video</Text>
-        </Pressable>
+        {/* <ImageBackground source={image} resizeMode="cover" style={styles.image}>
+        </ImageBackground> */}
+      <Pressable
+        style={({ pressed }) => [
+          {
+            backgroundColor: pressed ? 'yellow' : 'blue',
+          },
+          styles.button,
+        ]}
+        onPress={() => uploadVideoButton()}>
+        <Text style={styles.buttonText}>ladda upp video</Text>
+      </Pressable>
       </View>
   );
 };
