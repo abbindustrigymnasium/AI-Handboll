@@ -5,8 +5,9 @@ const image = { uri: 'AI-handboll/assets/images/sverige.jpg' };
 
 const uploadVideoButton = async () => {
   try {
-    const response = await fetch('http://54.145.22.116/put/?filename=');
+    const response = await fetch('https://pokeapi.co/api/v2/pokemon/ditto');
     const json = await response.json();
+    console.log(json);
     return json;
   } catch (error) {
     console.error(error);
