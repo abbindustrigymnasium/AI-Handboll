@@ -3,7 +3,10 @@
 @brief This program is made to find lines of a handball goal and measure angle of photo (POV).
 """
 
+import string
+from time import time
 import cv2
+from cv2 import minAreaRect
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -18,21 +21,40 @@ def sortBoxPoints(boxPoints: list) -> list:
     return bottom_left_to_right + top_right_to_left
 
 
-for f in range(1, 2):
-    default_image = f'Computer Vision\Goal\img\goal{f}.png'
+def averageArea(boxes: list) -> float:
+    """
+    Returns float of average area of boxes (to be used in sort function)
+    """
+    sum = 0
+    for box in boxes:
+        sum += cv2.contourArea(box)
+    try:
+        result = sum/(len(boxes))
+    except ZeroDivisionError as ZDE:
+        result = 0
+    return result
 
-    img = cv2.imread(default_image, cv2.IMREAD_GRAYSCALE)
+
+for f in range(3, 4):
+    default_image = f'Computer Vision\Goal\img\goal{f}.png'
+    # default_image = 'Computer Vision/Goal/img/test_line.png'
+
+    # H = (0,180)
+    # S = (0,22)
+    # V = (200,255)
+
+    img = cv2.imread(default_image)
     img = cv2.resize(img, (1080, 720), interpolation=cv2.INTER_AREA)
-    imgray = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+    frame_HSV = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    thresh = cv2.inRange(
+        frame_HSV, (0, 0, 207), (180, 47, 255))
 
     shape = img.shape
     height = shape[0]
     width = shape[1]
 
     blank = np.zeros((height, width, 3), dtype=np.uint8)
-    bcop = blank
 
-    ret, thresh = cv2.threshold(img, 150, 255, 0)
     contours, hierarchy = cv2.findContours(
         thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     newContours = []
@@ -41,9 +63,10 @@ for f in range(1, 2):
     # Rutor höjd/bredd ungefär lika med 25.5/9.5 = 2.7 +/- 0.3
 
     alignment_x = []
-    alignment_boxes = []
+    alignment_y = []
+    alignment_boxes = {'x': [], 'y': []}
 
-    for cnt in contours[2:]:
+    for cnt in contours:
         rect = cv2.minAreaRect(cnt)
         box = cv2.boxPoints(rect)
 
@@ -56,36 +79,96 @@ for f in range(1, 2):
         area = dist_x*dist_y
 
         box = np.int0(box)
-        cv2.drawContours(bcop, [box], 0, (255, 255, 255), 2)
+
+        if dist_x*dist_y == 0:
+            continue
 
         idx = -1
-        for a in alignment_x:
-            if a[0]-0.2*a[1] <= midPoint <= a[0]+0.2*a[1]:
-                # if a[2] * 0.5 <= area <= a[2] * 2 or True:
-                idx = alignment_x.index(a)
-                alignment_boxes[idx].append(box)
-        if idx == -1:
-            alignment_x.append([midPoint, dist_x, area])
-            alignment_boxes.append([box])
+        if 2.1 <= dist_y/dist_x <= 2.9 or 2.1 <= dist_x/dist_y <= 2.9:
+            for a in alignment_x:
+                if a[0]-0.5*a[1] <= midPoint <= a[0]+0.5*a[1]:
+                    idx = alignment_x.index(a)
+                    alignment_boxes['x'][idx].append(box)
+            if idx == -1:
+                alignment_x.append([midPoint, dist_x])
+                alignment_boxes['x'].append([box])
 
-    filter(lambda x: len(x) <= 7, alignment_boxes)
-    boxes = sorted(alignment_boxes, key=lambda l: len(l), reverse=True)
+        idy = -1
+        for a in alignment_y:
+            if a[0] - 3*a[1] <= midPoint_y <= a[0] + 3*a[1]:
+                if a[2] - 2*a[3] <= midPoint <= a[2] + 2*a[3]:
+                    idy = alignment_y.index(a)
+                    alignment_boxes['y'][idy].append(box)
+        if idy == -1:
+            alignment_y.append([midPoint_y, dist_y, midPoint, dist_x])
+            alignment_boxes['y'].append([box])
+
+    filtered_boxes = list(filter(lambda x: len(
+        x) > 1 and len(x) <= 7, alignment_boxes['x'] + alignment_boxes['y']))
+    boxes = sorted(filtered_boxes, key=averageArea, reverse=True)[:20]
 
     for als in boxes:
         for b in als:
             cv2.drawContours(blank, [b], 0, (255, 255, 255), 2)
+            cv2.drawContours(img, [b], 0, (0, 255, 0), 2)
+
     # if 2.1 <= h/w <= 2.9 or 0.29 <= w/h <= 0.45:
-    # cv2.rectangle(blank, (x, y), (x+w, y+h), (255, 255, 255), 2)
 
     # Edge detection
     dst = cv2.Canny(blank, 100, 200, None, 3)
     cdst = cv2.cvtColor(dst, cv2.COLOR_GRAY2BGR)
-    cblank = cv2.Canny(bcop, 100, 200, None, 3)
-    ccblank = cv2.cvtColor(cblank, cv2.COLOR_GRAY2BGR)
 
     # # Using probabilistic Hough Line Transform to find lines:
-    # lines = cv2.HoughLinesP(dst, 1, np.pi/180, 50, None, 100, 10)
+    lines = cv2.HoughLinesP(dst, 1, np.pi/180, 5, None, 5, 5)
 
+    # Equation of line is mx + b, where m = (y_1 - y_0) / (x_1 - x_0) and b is intersection with (0,0)
+    # slopes = {"normal": [], "vertical": []}
+    slopes = []
+    ms = []
+    simiLines = []
+
+    for line in lines:
+        m = None
+        b = line[0][0]
+        if line[0][2] - line[0][0] != 0:
+            m = ((line[0][3] - line[0][1]) / (line[0][2] - line[0][0]))
+            b = line[0][1] - m * line[0][0]
+            # slopes["normal"].append([m, line[0][0], line[0][1]])
+        else:
+            m = "VERTICAL"
+            # slopes["vertical"].append([line[0][0], line[0][1]])
+
+        l = line[0]
+
+        similar = False
+        for slope in slopes:
+            if m != "VERTICAL" and slope[0] != "VERTICAL":
+                if not 0.8*slope[0] <= m <= 1.2*slope[0] and not slope[1]-25 <= l[0] <= slope[1]+25 and not slope[2]-25 <= l[1] <= slope[2]+25:
+                    pass
+                else:
+                    similar = True
+            elif m == "VERTICAL" and slope[0] == "VERTICAL":
+                if not slope[1]-25 <= l[0] <= slope[1]+25 and not slope[2]-25 <= l[1] <= slope[2]+25:
+                    pass
+                else:
+                    similar = True
+        if not similar:
+            slopes.append([m, l[0], l[1]])
+            simiLines.append(line)
+
+        cv2.circle(img, (l[0], l[1]), 2, (255, 0, 255), 2)
+        cv2.circle(img, (l[2], l[3]), 2, (0, 255, 0), 2)
+
+    if len(simiLines) > 0:
+        for i in range(0, len(simiLines)):
+            l = simiLines[i][0]
+            cv2.line(cdst, (l[0], l[1]), (l[2], l[3]),
+                     (0, 0, 255), 2, cv2.LINE_AA)
+    else:
+        print("Lines empty!")
+
+    # # Regular Hough Line transform
+    # lines = cv2.HoughLines(dst, 1, np.pi/180, 105, None, 0, 0)
     # if lines is not None:
     #     for i in range(0, len(lines)):
     #         rho = lines[i][0][0]
@@ -99,18 +182,8 @@ for f in range(1, 2):
 
     #         cv2.line(cdst, pt1, pt2, (0, 255, 255), 1, cv2.LINE_AA)
 
-    # # Regular Hough Line transform
-    # lines = cv2.HoughLines(dst, 1, np.pi/180, 105, None, 0, 0)
-
-    # if lines is not None:
-    #     for i in range(0, len(lines)):
-    #         l = lines[i][0]
-    #         cv2.line(cdst, (l[0], l[1]), (l[2], l[3]),
-    #                  (0, 255, 255), 2, cv2.LINE_AA)
-    cv2.imshow("Original", ccblank)
-    cv2.imshow("\"Pattern Detection\"", cdst)
+    cv2.imshow("Result", img)
+    cv2.imshow("Thresh binary", cdst)
     cv2.waitKey()
-
-    # print(lines)
 
 # Gör så att pattern matching faktiskt gör nånting!!
