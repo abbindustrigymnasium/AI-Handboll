@@ -36,7 +36,7 @@ class poseDetector():
                 cx, cy, cz = int(lm.x * w), int(lm.y * h), int(lm.z * c)
                 lmList.append([id, cx, cy, cz])
                 if draw:
-                    cv2.circle(img, (cx, cy), 10, (255, 0, 0), cv2.FILLED)
+                    cv2.circle(img, (cx, cy), 1, (255, 0, 0), cv2.FILLED)
         return lmList
 
 

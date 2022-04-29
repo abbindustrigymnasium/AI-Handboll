@@ -1,15 +1,13 @@
 import torch
 import cv2
 
-
 def detectGoal(model_name, img):
     yolo_model = torch.hub.load('ultralytics/yolov5', 'custom', path=model_name, force_reload=True)
     res = yolo_model(img, size=640)
     res.print()
     return res
 
-
-def cropImage(img, results):
+def cropImage(results, img):
     xmin = int(results.pandas().xyxy[0]['xmin'])
     ymin = int(results.pandas().xyxy[0]['ymin'])
     xmax = int(results.pandas().xyxy[0]['xmax'])
@@ -23,8 +21,7 @@ def cropImage(img, results):
 
     return cropped_image
 
+image_file = './Yolo/Frames/frame1.jpg'
+results = detectGoal('best.pt', image_file)
 
-
-results = detectGoal('best.pt', './Frames/frame1.jpg')
-
-image = cropImage(results)
+image = cropImage(results, image_file)

@@ -1,7 +1,7 @@
 import torch
 import cv2
 import time
-# import PoseModule as pm
+import PoseModule as pm
 
 
 def detectGoal(img):
@@ -16,25 +16,36 @@ def cropImage(img, results):
     xmax = int(results.pandas().xyxy[0]['xmax'])
     ymax = int(results.pandas().xyxy[0]['ymax'])
 
-    image = cv2.imread(img)
-
     cropped_image = image[ymin:ymax, xmin:xmax]
-    # cv2.imshow("cropped", cropped_image)
-    # cv2.waitKey(0)
+
+    
 
     return cropped_image
 
+def cropImage(img, results):
+    width = int(img.shape[1] * scale_percent / 100)
+    height = int(img.shape[0] * scale_percent / 100)
+    dsize = (width, height)
+
+    scaledImage = cv2.resize(img, dsize)
+
+    return scaledImage
+
+
+
 yolo_model = torch.hub.load('ultralytics/yolov5', 'custom', path='best.pt', force_reload=True)
-# detector = pm.poseDetector()
+detector = pm.poseDetector()
 
 frame_rate = 10
 prev = 0
+scale_percent = 200
 
 
-vidcap = cv2.VideoCapture('./Video till AI/Sämre exempel 9m/Sämre 9m/nov52021-925fm-eeHazm.MOV')
-success,image = vidcap.read()
 
-while True:
+vidcap = cv2.VideoCapture('./Yolo/Video till AI/Bra exempel 9m/Bra 9m/Video 2018-07-24 18 48 02.mov')
+success, image = vidcap.read()
+
+while success:
 
     time_elapsed = time.time() - prev
     success, image = vidcap.read()
@@ -43,18 +54,13 @@ while True:
         prev = time.time()
         # Do something with your image here.
         results = detectGoal(image)
+        if results.pandas().xyxy[0].empty:
+            break
         image = cropImage(image, results)
-        # image = detector.findPose(image)
-        # lmList = detector.findPosition(image)
-    
-    cv2.imshow("image", image)
+        image = scaleImage(image, results)
+
+        image = detector.findPose(image)
+        lmList = detector.findPosition(image)
+
+    cv2.imshow("image", image)   
     cv2.waitKey(1)
-
-
-
-
-
-
-# results = detectGoal('best.pt', './Frames/frame1.jpg')
-
-# image = cropImage(results)
