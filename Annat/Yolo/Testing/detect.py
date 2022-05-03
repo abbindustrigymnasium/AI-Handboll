@@ -22,7 +22,7 @@ def cropImage(img, results):
 
     return cropped_image
 
-def cropImage(img, results):
+def scaleImage(img, results):
     width = int(img.shape[1] * scale_percent / 100)
     height = int(img.shape[0] * scale_percent / 100)
     dsize = (width, height)
@@ -32,14 +32,15 @@ def cropImage(img, results):
     return scaledImage
 
 
-
 yolo_model = torch.hub.load('ultralytics/yolov5', 'custom', path='best.pt', force_reload=True)
 detector = pm.poseDetector()
+
+
+
 
 frame_rate = 10
 prev = 0
 scale_percent = 200
-
 
 
 vidcap = cv2.VideoCapture('./Yolo/Video till AI/Bra exempel 9m/Bra 9m/Video 2018-07-24 18 48 02.mov')
@@ -58,7 +59,6 @@ while success:
             break
         image = cropImage(image, results)
         image = scaleImage(image, results)
-
         image = detector.findPose(image)
         lmList = detector.findPosition(image)
 
