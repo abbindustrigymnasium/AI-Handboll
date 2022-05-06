@@ -5,7 +5,7 @@ const image = { uri: 'AI-handboll/assets/images/sverige.jpg' };
 
 const uploadVideoButton = async () => {
   try {
-    const response = await fetch('https://54.145.22.116/docs#/default/create_upload_file_uploadfile_post');
+    const response = await fetch('https://54.145.22.116/uploadfile');
     const json = await response.json();
     //spara video?
     console.log(json);
