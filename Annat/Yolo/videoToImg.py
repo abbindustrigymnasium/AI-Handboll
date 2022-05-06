@@ -1,4 +1,3 @@
-from time import process_time_ns
 import cv2
 vidcap = cv2.VideoCapture('./Video till AI/Sämre exempel 9m/sen i redo/vid6.mp4')
 success,image = vidcap.read()
