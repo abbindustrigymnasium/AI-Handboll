@@ -1,25 +1,48 @@
 import React from 'react';
-import { ImageBackground, StyleSheet, Pressable, Alert, Text, View, } from 'react-native';
+import { StyleSheet, Pressable, Text, View } from 'react-native';
+import DocumentPicker from "react-native-document-picker";
 
-const image = { uri: 'AI-handboll/assets/images/sverige.jpg' };
+let bodyContent = new FormData();
+bodyContent.append('data', 'C:/utveckling/AI-Handboll/AI-handboll/Test.txt');
+
+let pickFile = async() => {
+  //pick a single file
+  console.log(DocumentPicker.pick())
+  try {
+    const res = await DocumentPicker.pick({
+      type: [DocumentPicker.types.video, DocumentPicker.types.plainText],//flera types ex: [DocumentPicker.types.csv, DocumentPicker.types.txt]
+    });
+    console.log(res);
+  } catch (err) {
+    if (DocumentPicker.isCancel(err)) {
+      console.log("error -----", err);
+    } else {
+      throw err;
+    }
+  }
+}
 
 const uploadVideoButton = async () => {
   try {
-    const response = await fetch('https://54.145.22.116/uploadfile');
-    const json = await response.json();
-    //spara video?
-    console.log(json);
-    return json;
-  } catch (error) {
-    console.error(error);
-  }
+    pickFile()
+    const response = await fetch('https://54.145.22.116/uploadfile', {
+      method: "POST",
+      body: bodyContent,
+      mode: 'no-cors'
+      // headers: headersList
+    }).then(function (response) {
+      return response.text();
+    }).then(function (data) {
+      console.log(data); })    
+}
+  catch(e){
+    console.log(e);
+  };
 };
 
 export default function TabOneScreen () {
   return (
       <View style={styles.container}>
-        {/* <ImageBackground source={image} resizeMode="cover" style={styles.image}>
-        </ImageBackground> */}
       <Pressable
         style={({ pressed }) => [
           {
@@ -59,5 +82,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: '100%',
     height: '100%',
-  }
-});
+  },})
