@@ -71,35 +71,37 @@ def on_high_V_thresh_trackbar(val):
     cv.setTrackbarPos(high_V_name, window_detection_name, high_V)
 
 
-img = cv.imread('Computer Vision\Goal\img\goal3.png')
-img = cv.resize(img, (1080, 720), interpolation=cv.INTER_AREA)
-
-cv.namedWindow(window_capture_name)
-cv.namedWindow(window_detection_name)
-cv.createTrackbar(low_H_name, window_detection_name, low_H,
-                  max_value_H, on_low_H_thresh_trackbar)
-cv.createTrackbar(high_H_name, window_detection_name, high_H,
-                  max_value_H, on_high_H_thresh_trackbar)
-cv.createTrackbar(low_S_name, window_detection_name, low_S,
-                  max_value, on_low_S_thresh_trackbar)
-cv.createTrackbar(high_S_name, window_detection_name, high_S,
-                  max_value, on_high_S_thresh_trackbar)
-cv.createTrackbar(low_V_name, window_detection_name, low_V,
-                  max_value, on_low_V_thresh_trackbar)
-cv.createTrackbar(high_V_name, window_detection_name, high_V,
-                  max_value, on_high_V_thresh_trackbar)
 while True:
-    frame = img
-    frame_HSV = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
-    frame_threshold = cv.inRange(
-        frame_HSV, (low_H, low_S, low_V), (high_H, high_S, high_V))
+    for f in range(1, 6):
+        img = cv.imread(f'Annat\Computer Vision\Goal\img\goal{f}.png')
+        img = cv.resize(img, (1080, 720), interpolation=cv.INTER_AREA)
 
-    cv.imshow(window_capture_name, frame)
-    cv.imshow(window_detection_name, frame_threshold)
+        cv.namedWindow(window_capture_name)
+        cv.namedWindow(window_detection_name)
+        cv.createTrackbar(low_H_name, window_detection_name, low_H,
+                          max_value_H, on_low_H_thresh_trackbar)
+        cv.createTrackbar(high_H_name, window_detection_name, high_H,
+                          max_value_H, on_high_H_thresh_trackbar)
+        cv.createTrackbar(low_S_name, window_detection_name, low_S,
+                          max_value, on_low_S_thresh_trackbar)
+        cv.createTrackbar(high_S_name, window_detection_name, high_S,
+                          max_value, on_high_S_thresh_trackbar)
+        cv.createTrackbar(low_V_name, window_detection_name, low_V,
+                          max_value, on_low_V_thresh_trackbar)
+        cv.createTrackbar(high_V_name, window_detection_name, high_V,
+                          max_value, on_high_V_thresh_trackbar)
+        while True:
+            frame = img
+            frame_HSV = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
+            frame_threshold = cv.inRange(
+                frame_HSV, (low_H, low_S, low_V), (high_H, high_S, high_V))
 
-    key = cv.waitKey(30)
-    if key == ord('q') or key == 27:
-        break
+            cv.imshow(window_capture_name, frame)
+            cv.imshow(window_detection_name, frame_threshold)
+
+            key = cv.waitKey(30)
+            if key == ord('q') or key == 27:
+                break
 
 # Bild 1:
 #   H = (0, 70)
@@ -115,3 +117,8 @@ while True:
 # V = (219,255)
 # Bild 4.2:
 # (0,0,207),(180,47,255)
+
+
+# Alla v1.0
+# Min = (0,0,183)
+# Max = (180,78,255)

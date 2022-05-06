@@ -35,19 +35,15 @@ def averageArea(boxes: list) -> float:
     return result
 
 
-for f in range(3, 4):
-    default_image = f'Computer Vision\Goal\img\goal{f}.png'
+for f in range(6, 7):
+    default_image = f'Annat\Computer Vision\Goal\img\goal{f}.png'
     # default_image = 'Computer Vision/Goal/img/test_line.png'
-
-    # H = (0,180)
-    # S = (0,22)
-    # V = (200,255)
 
     img = cv2.imread(default_image)
     img = cv2.resize(img, (1080, 720), interpolation=cv2.INTER_AREA)
     frame_HSV = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     thresh = cv2.inRange(
-        frame_HSV, (0, 0, 207), (180, 47, 255))
+        frame_HSV, (0, 0, 183), (180, 78, 255))
 
     shape = img.shape
     height = shape[0]
@@ -105,14 +101,12 @@ for f in range(3, 4):
 
     filtered_boxes = list(filter(lambda x: len(
         x) > 1 and len(x) <= 7, alignment_boxes['x'] + alignment_boxes['y']))
-    boxes = sorted(filtered_boxes, key=averageArea, reverse=True)[:20]
+    boxes = sorted(filtered_boxes, key=averageArea, reverse=True)[:30]
 
     for als in boxes:
         for b in als:
             cv2.drawContours(blank, [b], 0, (255, 255, 255), 2)
             cv2.drawContours(img, [b], 0, (0, 255, 0), 2)
-
-    # if 2.1 <= h/w <= 2.9 or 0.29 <= w/h <= 0.45:
 
     # Edge detection
     dst = cv2.Canny(blank, 100, 200, None, 3)
@@ -122,7 +116,7 @@ for f in range(3, 4):
     lines = cv2.HoughLinesP(dst, 1, np.pi/180, 5, None, 5, 5)
 
     # Equation of line is mx + b, where m = (y_1 - y_0) / (x_1 - x_0) and b is intersection with (0,0)
-    # slopes = {"normal": [], "vertical": []}
+
     slopes = []
     ms = []
     simiLines = []
@@ -133,10 +127,8 @@ for f in range(3, 4):
         if line[0][2] - line[0][0] != 0:
             m = ((line[0][3] - line[0][1]) / (line[0][2] - line[0][0]))
             b = line[0][1] - m * line[0][0]
-            # slopes["normal"].append([m, line[0][0], line[0][1]])
         else:
             m = "VERTICAL"
-            # slopes["vertical"].append([line[0][0], line[0][1]])
 
         l = line[0]
 
@@ -152,12 +144,10 @@ for f in range(3, 4):
                     pass
                 else:
                     similar = True
+
         if not similar:
             slopes.append([m, l[0], l[1]])
             simiLines.append(line)
-
-        cv2.circle(img, (l[0], l[1]), 2, (255, 0, 255), 2)
-        cv2.circle(img, (l[2], l[3]), 2, (0, 255, 0), 2)
 
     if len(simiLines) > 0:
         for i in range(0, len(simiLines)):
@@ -167,23 +157,19 @@ for f in range(3, 4):
     else:
         print("Lines empty!")
 
-    # # Regular Hough Line transform
-    # lines = cv2.HoughLines(dst, 1, np.pi/180, 105, None, 0, 0)
-    # if lines is not None:
-    #     for i in range(0, len(lines)):
-    #         rho = lines[i][0][0]
-    #         theta = lines[i][0][1]
-    #         a = np.cos(theta)
-    #         b = np.sin(theta)
-    #         x0 = a * rho
-    #         y0 = b * rho
-    #         pt1 = (int(x0+1000*(-b)), int(y0 + 1000*(a)))
-    #         pt2 = (int(x0-1000*(-b)), int(y0 - 1000*(a)))
+    # SKA FORTSÄTTA PÅ DENNA SOM SNARAST
+    # h_slopes = list(filter(lambda s: s[0] != "VERTICAL" ,slopes)) # Horizontal Slopes
+    # v_slopes = list(filter(lambda s: s[0] == "VERTICAL", slopes)) # Vertical Slopes
 
-    #         cv2.line(cdst, pt1, pt2, (0, 255, 255), 1, cv2.LINE_AA)
+    # v_index = 0
+
+    # found_goal = False
+
+    # for v in v_slopes:
+    #     for h in h_slopes:
+    #         if
+    #     v_index += 1
 
     cv2.imshow("Result", img)
     cv2.imshow("Thresh binary", cdst)
     cv2.waitKey()
-
-# Gör så att pattern matching faktiskt gör nånting!!
