@@ -2,9 +2,9 @@
 <html>
 
 <body class="hemsida">
-  <p>
+  <h1>
     AI-Handboll
-  </p>
+  </h1>
   <div class="center">
     <div class="button6">
       <input type="file" id="input" class="upload" multiple>
@@ -28,6 +28,7 @@
         headers: headersList
       }).then(function (response) {
         return response.text()
+        console.log(response)
       }).then(function (data) {
         console.log(data)
       })
